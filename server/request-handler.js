@@ -27,23 +27,67 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
+  // var body = [];
+  // request.on('data', function(chunk) {
+  //   body.push(chunk);
+  // });
+
+  // server.on('end', function() {
+  //   body = Buffer.concat(body).toString();
+  //   response.end(body);
+  // });
+  
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
+  var converse = {}; 
+  converse.results = [];
+  console.log(request.method);
   var statusCode = 200;
-
-  // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'text/plain';
+  
+   
+  if (request.method === 'GET') {
+    response.writeHead(statusCode, headers );
+    response.end(JSON.stringify(converse));
+  } else if (request.method === 'POST') {
+    
+    var requestBody = '';
+    request.on('data', function (data){
+      requestBody += data;
+    // response.writeHead(413, 'Request Entity Too Large', {'Content-Type': 'text/html'});
+    //       response.end('<!doctype html><html><head><title>413</title></head><body>413: Request Entity Too Large</body></html>');
+    });
+
+   var done = function () {
+    // var formData = 
+    // response.writeHead(200, {'Content-Type': 'text/html'});
+    // response.write('<!doctype html><html><head><title>response</title></head><body>');
+    // response.write('Thanks for the data!<br />User Name: '+ formData.UserName);
+    // response.write('<br />Repository Name: '+ formData.Repository);
+    // response.write('<br />Branch: '+ formData.Branch);
+    response.end(200);
+
+   };
+    
+    request.on('end', done );
+    // request.pipe(response);    
+  }
+  
+  // See the note below about CORS headers.
+  // var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  // we want to eventually send JSON
+  
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,7 +96,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -70,4 +114,5 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
+exports.requestHandler = requestHandler;
 
