@@ -11,7 +11,8 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-
+var converse = {}; 
+converse.results = [];
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -40,9 +41,6 @@ var requestHandler = function(request, response) {
   
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   // The outgoing status.
-  var converse = {}; 
-  converse.results = [];
-  console.log(request.method);
   var statusCode = 200;
   var defaultCorsHeaders = {
     'access-control-allow-origin': '*',
@@ -52,57 +50,29 @@ var requestHandler = function(request, response) {
   };
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'text/plain';
-  console.log(request.url);
   
-  var requestBody = '';
 
-  if (request.method === 'GET') {
- 
+  if ((request.method === 'GET') && (request.url === '/classes/messages' )) {
     response.writeHead(statusCode, headers);
-    
     response.end(JSON.stringify(converse));
     
-  } 
-
-  if (request.method === 'POST' && request.url === '/classes/messages') {
+  } else if ((request.method === 'POST') && (request.url === '/classes/messages')) {
+    var requestBody = '';
     response.writeHead(201, headers);
     request.on('data', (data) => {
       requestBody += data.toString();
     });
     request.on('end', () => {
       var profile = JSON.parse(requestBody);
-      console.log('wahoo');
       converse.results.push(profile);
-      console.log(converse.results)
       response.end(JSON.stringify(converse));
-    });
-    
-    
-    
-     
+      
+    });  
+  } else {
+    response.writeHead(404, headers);
+    response.end(404 + '');
   }
-//     var requestBody = '';
-//     request.on('data', function (data){
-//       requestBody += data;
-//       response.writeHead(413, 'Request Entity Too Large', {'Content-Type': 'text/html'});
-//     //       response.end('<!doctype html><html><head><title>413</title></head><body>413: Request Entity Too Large</body></html>');
-//     });
-
-//     var done = function () {
-//     // var formData = 
-//     // response.writeHead(200, {'Content-Type': 'text/html'});
-//     // response.write('<!doctype html><html><head><title>response</title></head><body>');
-//     // response.write('Thanks for the data!<br />User Name: '+ formData.UserName);
-//     // response.write('<br />Repository Name: '+ formData.Repository);
-//     // response.write('<br />Branch: '+ formData.Branch);
-//       response.end(200);
-
-//     };
-    
-//     request.on('end', done );
-//     // request.pipe(response);    
-//   }
-  
+};
   // See the note below about CORS headers.
   // var headers = defaultCorsHeaders;
 
@@ -125,7 +95,7 @@ var requestHandler = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
   
-};
+
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
