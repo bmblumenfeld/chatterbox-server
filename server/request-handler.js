@@ -36,9 +36,9 @@ var requestHandler = function(request, response) {
   //   body = Buffer.concat(body).toString();
   //   response.end(body);
   // });
+
   
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-
   // The outgoing status.
   var converse = {}; 
   converse.results = [];
@@ -52,34 +52,56 @@ var requestHandler = function(request, response) {
   };
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'text/plain';
+  console.log(request.url);
   
-   
+  var requestBody = '';
+
   if (request.method === 'GET') {
-    response.writeHead(statusCode, headers );
+ 
+    response.writeHead(statusCode, headers);
+    
     response.end(JSON.stringify(converse));
-  } else if (request.method === 'POST') {
     
-    var requestBody = '';
-    request.on('data', function (data){
-      requestBody += data;
-    // response.writeHead(413, 'Request Entity Too Large', {'Content-Type': 'text/html'});
-    //       response.end('<!doctype html><html><head><title>413</title></head><body>413: Request Entity Too Large</body></html>');
+  } 
+
+  if (request.method === 'POST' && request.url === '/classes/messages') {
+    response.writeHead(201, headers);
+    request.on('data', (data) => {
+      requestBody += data.toString();
     });
-
-    var done = function () {
-    // var formData = 
-    // response.writeHead(200, {'Content-Type': 'text/html'});
-    // response.write('<!doctype html><html><head><title>response</title></head><body>');
-    // response.write('Thanks for the data!<br />User Name: '+ formData.UserName);
-    // response.write('<br />Repository Name: '+ formData.Repository);
-    // response.write('<br />Branch: '+ formData.Branch);
-      response.end(200);
-
-    };
+    request.on('end', () => {
+      var profile = JSON.parse(requestBody);
+      console.log('wahoo');
+      converse.results.push(profile);
+      console.log(converse.results)
+      response.end(JSON.stringify(converse));
+    });
     
-    request.on('end', done );
-    // request.pipe(response);    
+    
+    
+     
   }
+//     var requestBody = '';
+//     request.on('data', function (data){
+//       requestBody += data;
+//       response.writeHead(413, 'Request Entity Too Large', {'Content-Type': 'text/html'});
+//     //       response.end('<!doctype html><html><head><title>413</title></head><body>413: Request Entity Too Large</body></html>');
+//     });
+
+//     var done = function () {
+//     // var formData = 
+//     // response.writeHead(200, {'Content-Type': 'text/html'});
+//     // response.write('<!doctype html><html><head><title>response</title></head><body>');
+//     // response.write('Thanks for the data!<br />User Name: '+ formData.UserName);
+//     // response.write('<br />Repository Name: '+ formData.Repository);
+//     // response.write('<br />Branch: '+ formData.Branch);
+//       response.end(200);
+
+//     };
+    
+//     request.on('end', done );
+//     // request.pipe(response);    
+//   }
   
   // See the note below about CORS headers.
   // var headers = defaultCorsHeaders;
