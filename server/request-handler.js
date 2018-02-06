@@ -44,6 +44,12 @@ var requestHandler = function(request, response) {
   converse.results = [];
   console.log(request.method);
   var statusCode = 200;
+  var defaultCorsHeaders = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'content-type, accept',
+    'access-control-max-age': 10 // Seconds.
+  };
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'text/plain';
   
@@ -60,16 +66,16 @@ var requestHandler = function(request, response) {
     //       response.end('<!doctype html><html><head><title>413</title></head><body>413: Request Entity Too Large</body></html>');
     });
 
-   var done = function () {
+    var done = function () {
     // var formData = 
     // response.writeHead(200, {'Content-Type': 'text/html'});
     // response.write('<!doctype html><html><head><title>response</title></head><body>');
     // response.write('Thanks for the data!<br />User Name: '+ formData.UserName);
     // response.write('<br />Repository Name: '+ formData.Repository);
     // response.write('<br />Branch: '+ formData.Branch);
-    response.end(200);
+      response.end(200);
 
-   };
+    };
     
     request.on('end', done );
     // request.pipe(response);    
@@ -108,11 +114,6 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
+
 exports.requestHandler = requestHandler;
 
