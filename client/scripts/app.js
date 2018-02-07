@@ -27,6 +27,7 @@ var app = {
 
     // Fetch previous messages
     app.startSpinner();
+    app.stopSpinner();
     app.fetch(false);
 
     // Poll for new messages
@@ -36,12 +37,11 @@ var app = {
   },
 
   send: function(message) {
-    app.startSpinner();
-
+    
     // POST the message to the server
     $.ajax({
       url: app.server,
-      type: 'POST',
+      method: 'POST',
       data: message,
       success: function (data) {
         // Clear messages input
@@ -59,30 +59,30 @@ var app = {
   fetch: function(animate) {
     $.ajax({
       url: app.server,
-      type: 'GET',
-      data: { order: '-createdAt' },
-      contentType: 'application/json',
+      method: 'GET',
+      
       success: function(data) {
+        console.log(typeof data);
+        var dat = JSON.parse(data);
         // Don't bother if we have nothing to work with
-        if (!data.results || !data.results.length) { return; }
+        if (!dat.results || !dat.results.length) { return; }
 
         // Store messages for caching later
-        app.messages = data.results;
+        app.messages = dat.results;
 
         // Get the last message
-        var mostRecentMessage = data.results[data.results.length - 1];
+        var mostRecentMessage = dat.results[dat.results.length - 1];
 
         // Only bother updating the DOM if we have a new message
-        if (mostRecentMessage.objectId !== app.lastMessageId) {
+        
           // Update the UI with the fetched rooms
-          app.renderRoomList(data.results);
+          // app.renderRoomList(dat.results);
 
           // Update the UI with the fetched messages
-          app.renderMessages(data.results, animate);
+          app.renderMessages(dat.results, animate);
 
           // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
-        }
+        
       },
       error: function(error) {
         console.error('chatterbox: Failed to fetch messages', error);
@@ -100,12 +100,11 @@ var app = {
     app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
-      messages
-        .filter(function(message) {
-          return message.roomname === app.roomname ||
-                 app.roomname === 'lobby' && !message.roomname;
-        })
-        .forEach(app.renderMessage);
+      messages.forEach(app.renderMessage);
+      // .filter(function(message) {
+      //   return message.roomname === app.roomname ||
+      //          app.roomname === 'lobby' && !message.roomname;
+      // })
     }
 
     // Make it scroll to the top
@@ -140,13 +139,13 @@ var app = {
     var $option = $('<option/>').val(roomname).text(roomname);
 
     // Add to select
-    app.$roomSelect.append($option);
+    app.$roomSelect.prepend($option);
   },
 
   renderMessage: function(message) {
-    if (!message.roomname) {
-      message.roomname = 'lobby';
-    }
+    // if (!message.roomname) {
+    //   message.roomname = 'lobby';
+    // }
 
     // Create a div to hold the chats
     var $chat = $('<div class="chat"/>');
@@ -162,7 +161,7 @@ var app = {
     }
 
     var $message = $('<br><span/>');
-    $message.text(message.text).appendTo($chat);
+    $message.text(message.message).appendTo($chat);
 
     // Add the message to the UI
     app.$chats.append($chat);
@@ -214,9 +213,9 @@ var app = {
   handleSubmit: function(event) {
     var message = {
       username: app.username,
-      text: app.$message.val(),
-      roomname: app.roomname || 'lobby'
+      message: app.$message.val(),
     };
+    message = JSON.stringify(message);
 
     app.send(message);
 

@@ -12,7 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var converse = {}; 
-converse.results = [];
+converse.results = [{username: 'Ringo Star', message: 'yassssss'}];
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -53,10 +53,12 @@ var requestHandler = function(request, response) {
   
 
   if ((request.method === 'GET') && (request.url === '/classes/messages' )) {
+    
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(converse));
     
   } else if ((request.method === 'POST') && (request.url === '/classes/messages')) {
+  
     var requestBody = '';
     response.writeHead(201, headers);
     request.on('data', (data) => {
